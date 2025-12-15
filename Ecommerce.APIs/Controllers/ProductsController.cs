@@ -1,10 +1,12 @@
-﻿using AutoMapper;
-using Microsoft.AspNetCore.Mvc;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
+using AutoMapper;
+using Ecommerce.APIs.Dtos;
+using Ecommerce.APIs.Helpers;
 using Ecommerce.Core.Entities;
 using Ecommerce.Core.Interfaces;
-using Ecommerce.APIs.Dtos;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+using Ecommerce.Core.Specifications;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Ecommerce.APIs.Controllers
 {
@@ -21,43 +23,52 @@ namespace Ecommerce.APIs.Controllers
             _mapper = mapper;
         }
 
-        // 1. Get All Products
+        
         [HttpGet]
-        public async Task<ActionResult<IReadOnlyList<ProductToReturnDto>>> GetProducts()
+        public async Task<ActionResult<Pagination<ProductToReturnDto>>> GetProducts([FromQuery] ProductSpecParams productParams)
         {
-            var products = await _unitOfWork.Repository<Product>().ListAllAsync();
+            
+            var spec = new ProductsWithTypesAndBrandsSpecification(productParams);
 
-            // تحويل الداتا لـ DTO عشان شكل الـ JSON والـ URL بتاع الصور يظبط
+            
+            var countSpec = new ProductWithFiltersForCountSpecification(productParams);
+
+            var totalItems = await _unitOfWork.Repository<Product>().CountAsync(countSpec);
+
+            
+            var products = await _unitOfWork.Repository<Product>().ListAsync(spec);
+
+            
             var data = _mapper.Map<IReadOnlyList<Product>, IReadOnlyList<ProductToReturnDto>>(products);
 
-            return Ok(data);
+            
+            return Ok(new Pagination<ProductToReturnDto>(productParams.PageIndex, productParams.PageSize, totalItems, data));
         }
 
-        // 2. Get Product By Id
+        
         [HttpGet("{id}")]
         public async Task<ActionResult<ProductToReturnDto>> GetProduct(int id)
         {
-            var product = await _unitOfWork.Repository<Product>().GetByIdAsync(id);
+            var spec = new ProductsWithTypesAndBrandsSpecification(id);
+            var product = await _unitOfWork.Repository<Product>().GetEntityWithSpec(spec);
 
             if (product == null) return NotFound();
 
             return _mapper.Map<Product, ProductToReturnDto>(product);
         }
 
-        // 3. Get Brands (عشان الفلتر)
+        
         [HttpGet("brands")]
         public async Task<ActionResult<IReadOnlyList<ProductBrand>>> GetProductBrands()
         {
-            var brands = await _unitOfWork.Repository<ProductBrand>().ListAllAsync();
-            return Ok(brands);
+            return Ok(await _unitOfWork.Repository<ProductBrand>().ListAllAsync());
         }
 
-        // 4. Get Types (عشان الفلتر)
+        
         [HttpGet("types")]
         public async Task<ActionResult<IReadOnlyList<ProductType>>> GetProductTypes()
         {
-            var types = await _unitOfWork.Repository<ProductType>().ListAllAsync();
-            return Ok(types);
+            return Ok(await _unitOfWork.Repository<ProductType>().ListAllAsync());
         }
     }
 }
