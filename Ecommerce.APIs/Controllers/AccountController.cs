@@ -5,6 +5,7 @@ using Ecommerce.Core.Entities.Identity;
 using Ecommerce.Core.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Ecommerce.APIs.Extensions;
 
 namespace Ecommerce.APIs.Controllers
 {
@@ -72,4 +73,35 @@ namespace Ecommerce.APIs.Controllers
             return await _userManager.FindByEmailAsync(email) != null;
         }
     }
-}
+    [HttpGet("emailexists")]
+        public async Task<ActionResult<bool>> CheckEmailExistsAsync([FromQuery] string email)
+        {
+            // ÈíÑÌÚ true áæ ÇáÇíãíá ãæÌæÏ¡ æ false áæ ãÔ ãæÌæÏ
+            return await _userManager.FindByEmailAsync(email) != null;
+        }
+        [Authorize]
+        [HttpGet("address")]
+        public async Task<ActionResult<AddressDto>> GetUserAddress()
+        {
+            // ÈäÓÊÎÏã ÇáÜ Extension Çááí áÓå ÚÇãáíäå İí İíÏíæ 3
+            var user = await _userManager.FindUserByClaimsPrincipleWithAddressAsync(User);
+
+            return _mapper.Map<Ecommerce.Core.Entities.Identity.Address, AddressDto>(user.Address);
+        }
+
+        [Authorize]
+        [HttpPut("address")]
+        public async Task<ActionResult<AddressDto>> UpdateUserAddress(AddressDto address)
+        {
+            var user = await _userManager.FindUserByClaimsPrincipleWithAddressAsync(User);
+
+            // ÊÍÏíË ÇáÈíÇäÇÊ
+            user.Address = _mapper.Map<AddressDto, Ecommerce.Core.Entities.Identity.Address>(address);
+
+            var result = await _userManager.UpdateAsync(user);
+
+            if (result.Succeeded) return Ok(_mapper.Map<Ecommerce.Core.Entities.Identity.Address, AddressDto>(user.Address));
+
+            return BadRequest("Problem updating the user");
+        }
+    }

@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using System.Reflection;
 using Ecommerce.Core.Entities;
+using Ecommerce.Core.Entities.OrderAggregate;
 
 namespace Ecommerce.Repository.Data
 {
@@ -13,8 +14,11 @@ namespace Ecommerce.Repository.Data
 		public DbSet<Product> Products { get; set; }
 		public DbSet<ProductBrand> ProductBrands { get; set; }
 		public DbSet<ProductType> ProductTypes { get; set; }
+        public DbSet<Order> Orders { get; set; }
+        public DbSet<OrderItem> OrderItems { get; set; }
+        public DbSet<DeliveryMethod> DeliveryMethods { get; set; }
 
-		protected override void OnModelCreating(ModelBuilder modelBuilder)
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{
 			base.OnModelCreating(modelBuilder);
 			modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());

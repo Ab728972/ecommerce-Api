@@ -44,6 +44,16 @@ namespace Ecommerce.Repository.Data
                         context.Products.Add(product);
                     await context.SaveChangesAsync();
                 }
+                if (!context.DeliveryMethods.Any())
+                {
+                    var dmData = File.ReadAllText("../Ecommerce.Repository/Data/SeedData/delivery.json");
+                    var methods = JsonSerializer.Deserialize<List<DeliveryMethod>>(dmData);
+                    foreach (var item in methods)
+                    {
+                        context.DeliveryMethods.Add(item);
+                    }
+                    await context.SaveChangesAsync();
+                }
             }
         }
     }
