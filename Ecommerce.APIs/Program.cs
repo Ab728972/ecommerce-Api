@@ -1,5 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using Ecommerce.Repository.Data;
+using StackExchange.Redis; 
+using Ecommerce.Core.Interfaces;
+using Ecommerce.Repository.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,16 +17,26 @@ builder.Services.AddDbContext<StoreContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
 
-//  Ê’Ì· «·‹ UnitOfWork
+builder.Services.AddSingleton<IConnectionMultiplexer>(c => {
+var configuration = ConfigurationOptions.Parse(builder.Configuration.GetConnectionString("Redis"), true);
+return ConnectionMultiplexer.Connect(configuration);
+
+
+
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
-//  Ê’Ì· «·‹ GenericRepository («Õ Ì«ÿÌ ·Ê «Õ Ã‰«Â ·ÊÕœÂ)
+
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 
 //  Ê’Ì· «·‹ AutoMapper
 builder.Services.AddAutoMapper(typeof(MappingProfiles));
 
 var app = builder.Build();
+
+
+builder.Services.AddScoped<IBasketRepository, BasketRepository>();
+
+builder.Services.AddSingleton<IResponseCacheService, ResponseCacheService>();
 
 // Auto-Migrate on Start
 using (var scope = app.Services.CreateScope())
