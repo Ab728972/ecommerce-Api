@@ -69,6 +69,7 @@ builder.Services.AddSingleton<IResponseCacheService, ResponseCacheService>(); //
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();              // Session 2
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>)); // Session 2
 builder.Services.AddAutoMapper(typeof(MappingProfiles));            // Session 2
+builder.Services.AddScoped<IPaymentService, PaymentService>();
 
 // --- Error Handling (Validation Errors) [Session 5] ---
 builder.Services.Configure<ApiBehaviorOptions>(options =>

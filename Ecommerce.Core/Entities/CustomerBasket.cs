@@ -13,7 +13,13 @@ namespace Ecommerce.Core.Entities
             Id = id;
         }
 
-        public string Id { get; set; } // ÇáÜ Id åäÇ string ÚÔÇä åíÈŞì generated client-side
+        public string Id { get; set; }
         public List<BasketItem> Items { get; set; } = new List<BasketItem>();
+
+        // ÇáÅÖÇİÇÊ ÇáÌÏíÏÉ áÜ Stripe
+        public int? DeliveryMethodId { get; set; }
+        public string ClientSecret { get; set; }
+        public string PaymentIntentId { get; set; }
+        public decimal ShippingPrice { get; set; }
     }
 }
