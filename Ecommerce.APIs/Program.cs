@@ -14,6 +14,15 @@ builder.Services.AddDbContext<StoreContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
 
+//  Ê’Ì· «·‹ UnitOfWork
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+//  Ê’Ì· «·‹ GenericRepository («Õ Ì«ÿÌ ·Ê «Õ Ã‰«Â ·ÊÕœÂ)
+builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+
+//  Ê’Ì· «·‹ AutoMapper
+builder.Services.AddAutoMapper(typeof(MappingProfiles));
+
 var app = builder.Build();
 
 // Auto-Migrate on Start
